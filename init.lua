@@ -2,46 +2,6 @@
 
 require('strict').on()
 
-rawset(
-    _G, 
-    'to_record_batch', 
-    function(acc, x)
-        local n = acc:get_schema():get_fields()
-        
-        for i, f in ipairs(n) do
-            acc:get_column_builder(i - 1):append(x[f:get_name()])
-        end
-        
-        return acc
-    end
-)
-
-rawset(
-    _G,
-    'new_schema',
-    function(schema)
-        local lgi = require("lgi")
-        local Arrow = lgi.Arrow
-        local m = {
-            ['timestamp[ms]'] = function()
-                return Arrow.TimestampDataType.new(Arrow.TimeUnit.MILLI)
-            end,
-            ['float'] = function() 
-                return Arrow.FloatDataType.new()
-            end,
-            ['string'] = function()
-                return Arrow.StringDataType.new()
-            end
-        }
-        local fields = {}
-        for _, t in ipairs(schema) do
-            table.insert(fields, Arrow.Field.new(t.name, m[t.type]()))
-        end
-
-        return Arrow.RecordBatchBuilder.new(Arrow.Schema.new(fields))
-    end
-)
-
 if package.setsearchroot ~= nil then
     package.setsearchroot()
 else
