@@ -1,0 +1,35 @@
+version: "3"
+services:
+  taranex:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: ["/usr/local/bin/tarantool"]
+    command: ["init.lua"]
+    networks:
+      net:
+    ports:
+      - 8081:8081
+      - 3301:3301
+
+  grafana:
+    image: grafana/grafana:master
+    environment: 
+      # disable annoying login for dev
+      GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION: "true"
+      GF_INSTALL_PLUGINS: "https://github.com/vasiliy-t/grafana-tarantool-datasource/releases/download/0.0.1/dist.zip;grafana-tarantool-datasource"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+      GF_AUTH_DISABLE_SIGNOUT_MENU: "true"
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+    networks:
+      net:
+    ports:
+      - 3000:3000
+    volumes:
+      - ./dev/grafana/provisioning/datasources/automatic.yaml:/etc/grafana/provisioning/datasources/automatic.yaml
+      
+networks:
+  net:
+    driver: bridge
+

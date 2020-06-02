@@ -1,0 +1,4 @@
+taranex.api_server:
+  workdir: ./tmp/db_dev/3301
+  advertise_uri: localhost:3301
+  http_port: 8081

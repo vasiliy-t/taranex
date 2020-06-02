@@ -1,0 +1,7 @@
+apiVersion: 1
+
+datasources:
+  - name: grafana_tarantool_datasource
+    type: vasiliy-t-grafana-tarantool-datasource
+    url: http://taranex:8081
+    isDefault: true
