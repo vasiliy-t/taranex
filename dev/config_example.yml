@@ -1,0 +1,7 @@
+--- 
+loader:
+  trackers:
+    - secid: "MTSS"
+    - secid: "YNDX"
+...
+
