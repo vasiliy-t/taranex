@@ -25,20 +25,23 @@ local function create_store_func()
     end
 
     return function(v)
-        local rc, err = date:parse(format_date, v[2])
-        if err ~= nil then
-            return nil, err
-        end
+      local vshard_router = cartridge.service_get("vshard-router").get("default")
+      local rc, err = date:parse(format_date, v[2])
+      if err ~= nil then
+          return nil, err
+      end
 
-        return box.space.candles:replace({
-            v[1],
-            date:get_millis(),
-            tonumber(v[3]),
-            tonumber(v[4]),
-            tonumber(v[5]),
-            tonumber(v[6]),
-            tonumber(v[7]),
-        })
+      local bucket_id = vshard_router:bucket_id(v[1])
+      return vshard_router:call(bucket_id, 'write', 'candles_replace', {{
+          bucket_id,
+          v[1],
+          date:get_millis(),
+          tonumber(v[3]),
+          tonumber(v[4]),
+          tonumber(v[5]),
+          tonumber(v[6]),
+          tonumber(v[7]),
+      }})
     end
 end
 
@@ -74,8 +77,8 @@ local function security_tracker(options)
             start = start + #data.candles.data
             fiber.yield()
         end
-        
-        if data.candles == nil or #data.candles.data == 0 then 
+
+        if data.candles == nil or #data.candles.data == 0 then
             fiber.sleep(call_period)
         end
     until not pcall(fiber.testcancel)
@@ -92,9 +95,9 @@ end
 
 local function validate_config(new_cfg, old_cfg)
     local log = require("log")
-    if new_cfg == nil then 
+    if new_cfg == nil then
         log.warn("loader: whole config is empty")
-        return true 
+        return true
     end
 
     local loader_cfg = new_cfg.loader
@@ -149,7 +152,7 @@ local function apply_config(cfg, opts)
         log.info(("[tracker] attempting to create security_tracker_%s"):format(c.secid))
         local fiber_name = ("security_tracker_%s"):format(c.secid)
         local count = fibers:filter(function(_, x) return x.name == fiber_name end):reduce(function(acc, x) return acc + 1 end, 0)
-        if count == 0 then 
+        if count == 0 then
             local f = fiber.new(security_tracker, {secid=c.secid})
             f:name(fiber_name)
         end
