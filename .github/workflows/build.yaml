@@ -1,0 +1,10 @@
+name: Greet Everyone
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: install luatest
+        uses: ./.github/actions/tarantool-action

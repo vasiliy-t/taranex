@@ -1,0 +1,5 @@
+name: 'Tarantool action'
+description: 'Do some job inside tarantool container'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
